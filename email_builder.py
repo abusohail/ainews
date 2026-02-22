@@ -94,8 +94,76 @@ def _render_section(title, emoji, items):
     """
 
 
-def build_email(grouped_items, total_collected):
-    """Build the complete HTML email from grouped items."""
+def _render_prompt_card(prompt):
+    """Render a single prompt set as a styled email card."""
+    category = prompt.get("category", "")
+    subject = prompt.get("subject", "")
+    angle = prompt.get("angle", "")
+    image_prompt = prompt.get("image_prompt", "")
+    veo3_prompt = prompt.get("veo3_prompt", "")
+    trending_hook = prompt.get("trending_hook", "")
+
+    # Category colors
+    cat_colors = {
+        "Talking Fruits & Vegetables": "#4CAF50",
+        "Health & Wellness Tips": "#2196F3",
+        "Talking Everyday Objects": "#FF9800",
+        "Animals Explaining Science": "#9C27B0",
+        "AI & Future Tech Visualizations": "#00BCD4",
+        "Motivational & Startup Stories": "#F44336",
+        "Satisfying Process Videos": "#E91E63",
+    }
+    color = cat_colors.get(category, "#666")
+
+    hook_html = ""
+    if trending_hook:
+        hook_html = f'<p style="margin:8px 0 0;color:#FFD700;font-size:12px;font-style:italic;">🔗 {trending_hook}</p>'
+
+    return f"""
+    <div style="background:#1E1E2E;border-radius:12px;padding:16px;margin-bottom:16px;border-left:4px solid {color};">
+        <div style="margin-bottom:8px;">
+            <span style="background:{color};color:#fff;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;">{category}</span>
+            <span style="color:#888;font-size:13px;margin-left:8px;">Subject: <strong style="color:#E0E0FF;">{subject}</strong></span>
+        </div>
+        <p style="color:#A0A0B0;font-size:12px;margin:4px 0 12px;font-style:italic;">💡 Angle: {angle}</p>
+
+        <div style="background:#15151F;border-radius:8px;padding:12px;margin-bottom:10px;">
+            <p style="color:#4CAF50;font-size:11px;font-weight:700;margin:0 0 6px;text-transform:uppercase;letter-spacing:1px;">🖼️ Image Prompt (Midjourney / DALL-E / Flux)</p>
+            <p style="color:#D0D0E0;font-size:13px;line-height:1.5;margin:0;">{image_prompt}</p>
+        </div>
+
+        <div style="background:#15151F;border-radius:8px;padding:12px;">
+            <p style="color:#FF5722;font-size:11px;font-weight:700;margin:0 0 6px;text-transform:uppercase;letter-spacing:1px;">🎬 Veo3 Video Prompt</p>
+            <p style="color:#D0D0E0;font-size:13px;line-height:1.5;margin:0;">{veo3_prompt}</p>
+        </div>
+
+        {hook_html}
+    </div>
+    """
+
+
+def _render_prompts_section(prompts):
+    """Render the full prompts section."""
+    if not prompts:
+        return ""
+
+    prompts_html = "".join(_render_prompt_card(p) for p in prompts)
+
+    return f"""
+    <div style="margin-bottom:32px;">
+        <h2 style="color:#E0E0FF;font-size:20px;font-weight:700;margin:0 0 8px;padding-bottom:8px;border-bottom:2px solid #2A2A3A;">
+            🎬 Today's Viral Content Prompts
+        </h2>
+        <p style="color:#888;font-size:13px;margin:0 0 16px;">
+            Ready-to-use prompts for AI image generators + Google Veo3 video. Copy-paste and create!
+        </p>
+        {prompts_html}
+    </div>
+    """
+
+
+def build_email(grouped_items, total_collected, prompts=None):
+    """Build the complete HTML email from grouped items and prompts."""
     # Count items
     total_shown = sum(len(items) for items in grouped_items.values())
 
@@ -103,21 +171,28 @@ def build_email(grouped_items, total_collected):
     tz = timezone(timedelta(hours=5))  # PKT
     today = datetime.now(tz).strftime("%A, %B %d, %Y")
 
-    # Build sections
+    # Build news sections
     sections = ""
     sections += _render_section("Top Stories", "🔥", grouped_items.get("top_stories", []))
     sections += _render_section("Trending Videos", "📺", grouped_items.get("videos", []))
     sections += _render_section("New AI Tools", "🚀", grouped_items.get("tools", []))
     sections += _render_section("News Roundup", "📰", grouped_items.get("news", []))
 
-    # If nothing collected
-    if not sections.strip():
+    # Build prompts section
+    prompts_section = _render_prompts_section(prompts or [])
+
+    # If nothing collected at all
+    if not sections.strip() and not prompts_section.strip():
         sections = """
         <div style="text-align:center;padding:40px;color:#888;">
             <p style="font-size:18px;">😴 Quiet day in AI land</p>
             <p>No outperforming content found in the last 24 hours.</p>
         </div>
         """
+
+    # Prompt count for header
+    prompt_count = len(prompts) if prompts else 0
+    prompt_note = f" · {prompt_count} viral prompts" if prompt_count else ""
 
     html = f"""
 <!DOCTYPE html>
@@ -135,12 +210,18 @@ def build_email(grouped_items, total_collected):
                 🤖 AI Daily Digest
             </h1>
             <p style="color:#8888AA;font-size:14px;margin:0;">
-                {today} · {total_shown} outperforming items from {total_collected} scanned
+                {today} · {total_shown} outperforming items from {total_collected} scanned{prompt_note}
             </p>
         </div>
 
-        <!-- Content -->
+        <!-- News Content -->
         {sections}
+
+        <!-- Divider between news and prompts -->
+        {"<div style='text-align:center;padding:20px;'><span style='color:#333;font-size:24px;'>• • •</span></div>" if prompts_section.strip() else ""}
+
+        <!-- Viral Content Prompts -->
+        {prompts_section}
 
         <!-- Footer -->
         <div style="text-align:center;padding:24px;color:#555;font-size:12px;border-top:1px solid #1A1A2A;margin-top:20px;">

@@ -15,7 +15,9 @@ import time
 from datetime import datetime, timezone, timedelta
 
 from collectors import reddit, hackernews, producthunt, youtube, twitter, news_rss
+from collectors.trending import get_daily_topics
 from ranker import rank_and_filter, group_by_type
+from prompt_generator import generate_prompts
 from email_builder import build_email
 from email_sender import send_email
 
@@ -77,9 +79,19 @@ def run(dry_run=False):
             print(f"  • {label}: {len(items)} items")
     print()
 
-    # Step 4: Build email
+    # Step 4: Get trending topics & generate prompts
+    print("🎬 Generating viral content prompts...")
+    try:
+        trending_data = get_daily_topics()
+        prompts = generate_prompts(trending_data)
+    except Exception as e:
+        print(f"  ⚠ Prompt generation failed: {e}")
+        prompts = []
+    print()
+
+    # Step 5: Build email
     print("📧 Building email digest...")
-    html = build_email(grouped, len(all_items))
+    html = build_email(grouped, len(all_items), prompts=prompts)
 
     if dry_run:
         print("\n🔍 DRY RUN — Email would contain:\n")
@@ -95,10 +107,17 @@ def run(dry_run=False):
                 if score:
                     print(f"         Score: {score:,}")
                 print()
+        if prompts:
+            print("\n  ── Viral Content Prompts ──")
+            for p in prompts:
+                print(f"  [{p['category']}] {p['subject']}")
+                print(f"         Image: {p['image_prompt'][:80]}...")
+                print(f"         Veo3:  {p['veo3_prompt'][:80]}...")
+                print()
         print("  ✓ Dry run complete. No email sent.")
         return
 
-    # Step 5: Send email
+    # Step 6: Send email
     print("📮 Sending email...")
     success = send_email(html)
 
@@ -183,7 +202,26 @@ def send_test():
         ],
     }
 
-    html = build_email(test_items, 42)
+    test_prompts = [
+        {
+            "category": "Talking Fruits & Vegetables",
+            "subject": "avocado",
+            "angle": "roasting people for eating junk food instead",
+            "image_prompt": "A giant avocado with a sassy expression and raised eyebrow, sitting next to junk food it disapproves of, 3D Pixar-style render, vibrant colors, soft lighting, cute character design",
+            "veo3_prompt": 'Medium shot of an avocado character with cartoon eyes and a mouth, standing on a kitchen counter next to a plate of junk food. The avocado gestures dramatically and says in a sassy tone: "Yes, I\'m expensive. But have you seen your hospital bills? I\'m the cheaper option." Camera at eye level, slight handheld movement. Bright kitchen lighting. Audio: comedic background music, expressive voice. (no subtitles)',
+            "trending_hook": "Trending tie-in: Connect this to 'Healthy Eating Week' for extra reach",
+        },
+        {
+            "category": "AI & Future Tech Visualizations",
+            "subject": "AI robot assistant",
+            "angle": "a day in the life in the year 2030",
+            "image_prompt": "Futuristic scene of AI robot assistant, glowing holographic interfaces, neon blue and purple lighting, cyberpunk aesthetic, cinematic film still, shallow depth of field, warm golden hour lighting",
+            "veo3_prompt": 'Sweeping aerial shot descending into a futuristic city scene showing AI robot assistant. Holographic interfaces glow in neon blue and purple. A narrator says in an awe-inspired voice: "Welcome to the year 2030. This is what your daily life looks like now." Dramatic cinematic lighting. Audio: epic orchestral music, deep narrator voice. (no subtitles)',
+            "trending_hook": "",
+        },
+    ]
+
+    html = build_email(test_items, 42, prompts=test_prompts)
     success = send_email(html)
 
     if success:
