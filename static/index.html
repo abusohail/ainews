@@ -1022,7 +1022,7 @@
                             <div class="toggle-sub">Creates 4 connected clips (32 sec total video)</div>
                         </div>
                         <label class="toggle">
-                            <input type="checkbox" id="customSeries">
+                            <input type="checkbox" id="seriesToggle">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -1036,7 +1036,7 @@
                     <div class="custom-result" id="customResult">
                         <div class="result-head">✅ Generated for: <span id="resultName"></span></div>
                         <div id="customCards"></div>
-                        <div id="customSeries"></div>
+                        <div id="seriesOut"></div>
                     </div>
                 </div>
             </div>
@@ -1172,8 +1172,11 @@
             all.style.display = 'none';
             btn.classList.add('spinning');
 
+            // Pass timestamp so every refresh yields different prompts
+            const fresh = Date.now();
+
             try {
-                const res = await fetch('/api/prompts');
+                const res = await fetch(`/api/prompts?fresh=${fresh}`);
                 const j = await res.json();
                 if (!j.success) throw new Error(j.error);
                 const d = j.data;
@@ -1214,7 +1217,7 @@
 
             const mode = document.getElementById('customMode').value;
             const instr = document.getElementById('customInstr').value.trim();
-            const series = document.getElementById('customSeries').checked;
+            const series = document.getElementById('seriesToggle').checked;
 
             const btn = document.getElementById('genBtn');
             const icon = document.getElementById('genBtnIcon');
@@ -1245,13 +1248,13 @@
                 document.getElementById('customCards').innerHTML = `<div class="grid" style="margin-bottom:16px;">${makeCard(cardData, 0)}</div>`;
 
                 if (d.series) {
-                    document.getElementById('customSeries').innerHTML = makeSeriesHTML({
+                    document.getElementById('seriesOut').innerHTML = makeSeriesHTML({
                         ...d.series,
                         name: d.name,
                         category: 'Custom',
                     });
                 } else {
-                    document.getElementById('customSeries').innerHTML = '';
+                    document.getElementById('seriesOut').innerHTML = '';
                 }
 
                 const resultEl = document.getElementById('customResult');

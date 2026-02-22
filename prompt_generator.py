@@ -730,29 +730,38 @@ def _generate_video_series(seed_str):
     }
 
 
-def generate_prompts(trending_data=None):
+def generate_prompts(trending_data=None, fresh_seed=None):
     """
-    Generate all prompt sections:
-    - daily: 5 mixed viral prompts
-    - fruits: 5 fruits & vegetables prompts
-    - series: 1 connected video series (3-5 clips)
-    - weekly: 5 weekly prompts
-    - monthly: 5 monthly prompts
+    Generate all prompt sections.
+    Pass fresh_seed (any string/number) to get different results on demand.
+    Without fresh_seed: daily/weekly/monthly slots rotate on schedule.
     """
     now = datetime.now(timezone.utc)
-    daily_seed = now.strftime("%Y-%m-%d")
-    weekly_seed = f"{now.year}-W{now.isocalendar()[1]}"
-    monthly_seed = now.strftime("%Y-%m")
+    date_str = now.strftime("%Y-%m-%d")
+    week_str = f"{now.year}-W{now.isocalendar()[1]}"
+    month_str = now.strftime("%Y-%m")
+
+    # fresh_seed lets the refresh button produce varied prompts within same day
+    extra = f"-{fresh_seed}" if fresh_seed else ""
+
+    daily_seed   = f"daily-{date_str}{extra}"
+    weekly_seed  = f"weekly-{week_str}{extra}"
+    monthly_seed = f"monthly-{month_str}{extra}"
+    fruits_seed  = f"fruits-{date_str}{extra}"
+    series_seed  = f"series-{date_str}{extra}"
 
     result = {
-        "daily": _generate_prompt_set(VIRAL_CATEGORIES, 5, f"daily-{daily_seed}"),
-        "fruits": _generate_fruits_section(daily_seed),
-        "series": _generate_video_series(daily_seed),
-        "weekly": _generate_prompt_set(VIRAL_CATEGORIES, 5, f"weekly-{weekly_seed}"),
-        "monthly": _generate_prompt_set(VIRAL_CATEGORIES, 5, f"monthly-{monthly_seed}"),
+        "daily":   _generate_prompt_set(VIRAL_CATEGORIES, 5, daily_seed),
+        "fruits":  _generate_prompt_set(
+            [c for c in VIRAL_CATEGORIES if c["category"] == "Talking Fruits & Vegetables"],
+            5, fruits_seed
+        ),
+        "series":  _generate_video_series(series_seed.replace("series-", "")),
+        "weekly":  _generate_prompt_set(VIRAL_CATEGORIES, 5, weekly_seed),
+        "monthly": _generate_prompt_set(VIRAL_CATEGORIES, 5, monthly_seed),
     }
 
-    total = len(result["daily"]) + len(result["fruits"]) + len(result["weekly"]) + len(result["monthly"])
-    series_clips = len(result["series"]["clips"])
-    print(f"  ✓ Generated {total} prompts + 1 video series ({series_clips} clips)")
+    total = sum(len(v) for k, v in result.items() if isinstance(v, list))
+    series_clips = len(result["series"].get("clips", []))
+    print(f"  ✓ Generated {total} prompts + 1 video series ({series_clips} clips) [seed={extra or 'scheduled'}]")
     return result

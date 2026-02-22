@@ -20,7 +20,9 @@ def index():
 @app.route("/api/prompts")
 def api_prompts():
     try:
-        data = generate_prompts()
+        # fresh_seed passed from frontend refresh button — gives different prompts each click
+        fresh_seed = request.args.get("fresh", None)
+        data = generate_prompts(fresh_seed=fresh_seed)
         return jsonify({"success": True, "data": data})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
