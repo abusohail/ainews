@@ -1,7 +1,7 @@
 """
-Prompt Generator — Creates ready-to-use AI image prompts and Veo3 video prompts
-based on trending topics and viral content categories.
-Each day generates fresh, unique prompts for content creation.
+Prompt Generator — Creates ready-to-use AI image prompts and Veo3 video prompts.
+Generates 3 sets: Today (5), This Week (5), This Month (5).
+All dialogues are in Roman Urdu (Urdu written in Roman script).
 """
 
 import random
@@ -9,7 +9,6 @@ from datetime import datetime, timezone
 
 
 # ─── Image Prompt Templates ──────────────────────────────────────────────────
-# Optimized for Midjourney, DALL-E, Ideogram, Flux
 
 IMAGE_STYLES = [
     "hyperrealistic photography, 8K, studio lighting, sharp focus",
@@ -35,7 +34,6 @@ IMAGE_TEMPLATES = {
         "A beautiful flat lay arrangement related to {subject}, shot from above on a marble surface with natural light, {style}",
         "Infographic-style image showing the benefits of {subject}, with icons and a human body silhouette, clean medical design, {style}",
         "A serene scene of someone practicing {subject} in a beautiful natural setting at sunrise, {style}",
-        "Before and after comparison showing the effects of {subject}, dramatic transformation, {style}",
     ],
     "Talking Everyday Objects": [
         "A {subject} with an animated cartoon face, sitting on a nightstand, looking annoyed at its owner, {style}",
@@ -66,73 +64,72 @@ IMAGE_TEMPLATES = {
 }
 
 # ─── Veo3 Video Prompt Templates ─────────────────────────────────────────────
-# Optimized for Google Veo3 — includes camera, audio, and scene direction
 
 VEO3_TEMPLATES = {
     "Talking Fruits & Vegetables": [
         (
             'Close-up cinematic shot of a {subject} with an expressive animated face, sitting on a rustic wooden cutting board in a sunlit kitchen. '
-            'The {subject} looks directly at camera with big eyes and starts speaking in a confident, friendly voice: '
+            'The {subject} looks directly at camera with big eyes and starts speaking in a confident, friendly Urdu voice: '
             '"{dialogue}" '
-            'Camera slowly dollies in. Warm natural lighting from a window. Audio: cheerful background music, crisp voice. (no subtitles)'
+            'Camera slowly dollies in. Warm natural lighting from a window. Audio: cheerful background music, crisp Urdu voice. (no subtitles)'
         ),
         (
             'Medium shot of a {subject} character with cartoon eyes and a mouth, standing on a kitchen counter next to a plate of junk food. '
-            'The {subject} gestures dramatically and says in a sassy tone: "{dialogue}" '
-            'Camera at eye level, slight handheld movement. Bright kitchen lighting. Audio: comedic background music, expressive voice. (no subtitles)'
+            'The {subject} gestures dramatically and says in a sassy Urdu tone: "{dialogue}" '
+            'Camera at eye level, slight handheld movement. Bright kitchen lighting. Audio: comedic background music, expressive Urdu voice. (no subtitles)'
         ),
         (
             'Wide angle shot of a farmer\'s market scene. A {subject} with a cute animated face sits on a display stand. '
-            'It turns to camera and says enthusiastically: "{dialogue}" '
-            'Shallow depth of field, golden hour lighting. Audio: ambient market sounds, warm voice. (no subtitles)'
+            'It turns to camera and says enthusiastically in Urdu: "{dialogue}" '
+            'Shallow depth of field, golden hour lighting. Audio: ambient market sounds, warm Urdu voice. (no subtitles)'
         ),
     ],
     "Health & Wellness Tips": [
         (
             'Cinematic tracking shot following a person as they demonstrate {subject}. '
             'The scene transitions from a dark, sluggish morning to an energetic, vibrant atmosphere. '
-            'Voiceover narrates: "{dialogue}" '
-            'Warm golden lighting gradually increases. Audio: inspirational ambient music, calm narrator voice. (no subtitles)'
+            'Voiceover narrates in Urdu: "{dialogue}" '
+            'Warm golden lighting gradually increases. Audio: inspirational ambient music, calm Urdu narrator voice. (no subtitles)'
         ),
         (
             'Close-up slow motion of {subject} being practiced, with stunning visual details. '
             'Camera orbits around the subject. Beautiful natural lighting. '
-            'A confident voice explains: "{dialogue}" '
-            'Audio: soft piano music, clear voice, subtle ASMR textures. (no subtitles)'
+            'A confident voice explains in Urdu: "{dialogue}" '
+            'Audio: soft piano music, clear Urdu voice, subtle ASMR textures. (no subtitles)'
         ),
     ],
     "Talking Everyday Objects": [
         (
             'Close-up shot of a {subject} on a bedside table at 6 AM. The {subject} has a cartoon face that suddenly opens its eyes. '
-            'Looking exasperated, it says: "{dialogue}" '
-            'Camera slow push-in. Early morning blue light transitioning to warm. Audio: alarm sound fading in, comedic voice. (no subtitles)'
+            'Looking exasperated, it says in Urdu: "{dialogue}" '
+            'Camera slow push-in. Early morning blue light transitioning to warm. Audio: alarm sound fading in, comedic Urdu voice. (no subtitles)'
         ),
         (
             'Medium shot of a {subject} sitting alone on a shelf. It comes to life with cartoon eyes and mouth. '
-            'Looking at camera with a knowing expression, it says: "{dialogue}" '
-            'Soft room lighting, shallow depth of field. Audio: gentle background music, wise-sounding voice. (no subtitles)'
+            'Looking at camera with a knowing expression, it says in Urdu: "{dialogue}" '
+            'Soft room lighting, shallow depth of field. Audio: gentle background music, wise-sounding Urdu voice. (no subtitles)'
         ),
     ],
     "Animals Explaining Science": [
         (
             'Medium shot of a {subject} sitting at a tiny desk in a library setting, wearing miniature round glasses. '
-            'It looks up from a book at the camera and says in a professorial tone: "{dialogue}" '
-            'Warm library lighting, bookshelves in background. Camera slowly zooms in. Audio: gentle classical music, scholarly voice. (no subtitles)'
+            'It looks up from a book at the camera and says in a professorial Urdu tone: "{dialogue}" '
+            'Warm library lighting, bookshelves in background. Camera slowly zooms in. Audio: gentle classical music, scholarly Urdu voice. (no subtitles)'
         ),
     ],
     "AI & Future Tech Visualizations": [
         (
             'Sweeping aerial shot descending into a futuristic city scene showing {subject}. '
             'Holographic interfaces glow in neon blue and purple. Everything feels sleek and advanced. '
-            'A narrator says in an awe-inspired voice: "{dialogue}" '
-            'Dramatic cinematic lighting. Audio: epic orchestral music, deep narrator voice. (no subtitles)'
+            'A narrator says in an awe-inspired Urdu voice: "{dialogue}" '
+            'Dramatic cinematic lighting. Audio: epic orchestral music, deep Urdu narrator voice. (no subtitles)'
         ),
     ],
     "Motivational & Startup Stories": [
         (
             'Cinematic close-up of a founder\'s face illuminated by a laptop screen in a dark garage. They\'re working on {subject}. '
-            'The person looks at camera with determination and says: "{dialogue}" '
-            'Low-key dramatic lighting, shallow depth of field. Audio: emotional piano building, raw authentic voice. (no subtitles)'
+            'The person looks at camera with determination and says in Urdu: "{dialogue}" '
+            'Low-key dramatic lighting, shallow depth of field. Audio: emotional piano building, raw authentic Urdu voice. (no subtitles)'
         ),
     ],
     "Satisfying Process Videos": [
@@ -144,91 +141,248 @@ VEO3_TEMPLATES = {
     ],
 }
 
-# ─── Dialogue Lines per Category ─────────────────────────────────────────────
+# ─── Roman Urdu Dialogue Lines ───────────────────────────────────────────────
 
 DIALOGUES = {
     "Talking Fruits & Vegetables": {
         "apple": [
-            "One of me a day and your doctor stays unemployed. You're welcome.",
-            "You know what's in me? Fiber, vitamins, and pure disappointment that you chose chips instead.",
-            "I've been sitting in your fruit bowl for a week. EAT ME before I go bad!",
+            "Roz ek apple khao aur doctor ki zaroorat nahi. Yeh meri taraf se free mashwara hai!",
+            "Mujh mein fiber hai, vitamins hain, aur tumhari chips ki aadat pe bohot dukh hai.",
+            "Ek hafta ho gaya fruit bowl mein. Mujhe khao yaar, kharab ho jaunga!",
+            "Tumhare jism ko meri zaroorat hai, lekin tum junk food ke peechay bhaag rahe ho.",
         ],
         "banana": [
-            "I'm literally the perfect snack. I come in my own wrapper. What's your excuse, candy bar?",
-            "Potassium, energy, happiness — I bring it all. And I'm only 100 calories. You're welcome.",
-            "Stop scrolling and peel me. Your muscles will thank you later.",
+            "Main perfect snack hoon bhai. Apna wrapper bhi saath laata hoon. Chips mein yeh baat hai?",
+            "Potassium, energy, khushi — sab kuch hai mujh mein. Aur sirf sau calories. Khao mujhe!",
+            "Phone rakh do aur mujhe cheel lo. Tumhare muscles baad mein shukriya kahenge.",
+            "Subah ka pehla kaam — banana khao. Energy din bhar rahegi, promise!",
         ],
         "avocado": [
-            "Yes, I'm expensive. But have you seen your hospital bills? I'm the cheaper option.",
-            "Healthy fats, fiber, and twenty different vitamins. I'm basically a multivitamin with better branding.",
-            "Millennials didn't ruin the economy — they just discovered I'm delicious on toast.",
+            "Haan bhai mehenga hoon. Lekin hospital ka bill dekha hai? Main sasta option hoon.",
+            "Healthy fats, fiber, aur bees tarah ke vitamins. Main basically multivitamin hoon.",
+            "Log kehtay hain mehenga hai. Bhai sehat ka koi mol nahi hota, samjho!",
+            "Toast pe lagao, salad mein daalo — bas mujhe ignore mat karo!",
         ],
         "broccoli": [
-            "Kids hate me. Adults tolerate me. Your immune system LOVES me. Know your audience.",
-            "More vitamin C than an orange, more calcium than milk. But sure, keep ignoring me.",
-            "Steam me, roast me, stir-fry me — I don't care how you eat me, just eat me!",
+            "Bachay mujhse nafrat karte hain, baray bardasht karte hain, lekin immunity MUJHSE pyaar karti hai!",
+            "Orange se zyada vitamin C, doodh se zyada calcium. Phir bhi log mujhe ignore karte hain.",
+            "Steam karo, roast karo, fry karo — mujhe parwah nahi kaise khate ho, bas khao!",
+            "Main sabziyon ka king hoon. Lekin tum ne aaj bhi burger kha liya. Sharam karo!",
         ],
         "carrot": [
-            "Your grandma was right — I AM good for your eyes. Also your skin, your gut, and your heart.",
-            "I can be a snack, a juice, a soup, or a cake. Name another vegetable that versatile.",
+            "Tumhari dadi sahi kehti thi — main aankhon ke liye acha hoon. Aur skin, pet, dil ke liye bhi!",
+            "Snack ban sakta hoon, juice ban sakta hoon, soup bhi. Itni versatile aur kaun si sabzi hai?",
+            "Mujhe halwa bana lo, mujhe salad mein daalo — bas mujhe fridge mein akela mat chhoro!",
         ],
         "garlic": [
-            "Vampires, bacteria, and heart disease all fear me. I'm basically a superfood bouncer.",
-            "Yes, I make your breath smell. But I also make your immune system unstoppable. Trade-off accepted.",
+            "Vampires, bacteria, aur dil ki bimari — sab mujhse darte hain. Main superfood ka bouncer hoon!",
+            "Haan saans mein boo aati hai. Lekin immunity itni strong ho jaati hai ke bimari bhaag jaati hai.",
+            "Khana mein agar main nahi toh taste bhi nahi aur sehat bhi nahi. Sochlo!",
         ],
         "lemon": [
-            "Start your morning with my juice in warm water. Your metabolism will wake up faster than coffee.",
-            "I'm sour, I know. But my vitamin C content is sweet for your immune system.",
+            "Subah garam paani mein mera ras daalo. Metabolism coffee se bhi pehle jaag jayega.",
+            "Khatta hoon, pata hai. Lekin mera vitamin C tumhari immunity ke liye meetha hai!",
+            "Nimbu paani piyo, taza raho. Yeh desi nuskha hai aur kaam karta hai!",
+        ],
+        "watermelon": [
+            "Garmi mein mujhse behtar koi nahi. Paani bhi milega aur maza bhi!",
+            "Dehydration ka ilaaj hoon main. Cold drink choro, mujhe khao!",
+            "Bees rupay mein itna paani aur vitamins — koi deal itni achi nahi milegi!",
+        ],
+        "mango": [
+            "Phalon ka badshah hoon main. Season aaye toh mujhe zaroor khana!",
+            "Vitamin A, C, fiber — aur taste toh poochho hi mat. King of fruits hoon bhai!",
+            "Log diet ke naam pe mujhse door bhagte hain. Arre moderation mein khao, maza aayega!",
+        ],
+        "spinach": [
+            "Popeye ne mujhe kha ke taaqat payi thi. Tum kyun nahi khaate?",
+            "Iron, calcium, vitamins — main chhota sa saag hoon lekin power bohot hai!",
+            "Palak paneer bana lo, smoothie mein daalo — bas mujhe waste mat karo!",
+        ],
+        "tomato": [
+            "Sabzi hoon ya fruit, yeh debate baad mein. Pehle mujhe khao, sehat banao!",
+            "Lycopene mujh mein hai — dil ki sehat ke liye behtareen hoon main!",
+            "Har khane mein main hoon. Salad, curry, chutney — versatile king hoon main!",
         ],
         "_default": [
-            "Hey you! Yeah, the one eating processed food. Come talk to me instead.",
-            "You scrolled past three fruit videos today. Time to actually eat one of us.",
-            "I'm not just food — I'm medicine. Start treating me like it.",
+            "Oye! Haan tum — jo processed food kha rahe ho. Idhar aao, mujhse baat karo!",
+            "Aaj teen fruit ki video dekhi lekin ek bhi nahi khaya. Sharam karo yaar!",
+            "Main sirf khana nahi hoon — main dawai hoon. Aise treat karo mujhe!",
+            "Tumhari sehat tumhare haath mein hai. Aur main tumhare haath mein hona chahiye!",
         ],
     },
     "Health & Wellness Tips": {
         "_default": [
-            "This one simple change transformed my energy levels completely.",
-            "Scientists say this is the most underrated health habit. And almost nobody does it.",
-            "Your body is trying to tell you something. Here's what it means.",
-            "I tried this for 30 days and the results shocked me.",
-            "This is what happens to your body when you start doing this every morning.",
+            "Yeh ek simple change ne meri poori energy badal di. Suno dhyan se!",
+            "Science kehti hai yeh sabse underrated health habit hai. Aur koi nahi karta!",
+            "Tumhara jism tumhe kuch batana chahta hai. Aao samjhte hain.",
+            "Maine yeh 30 din kiya aur results ne mujhe bhi hairan kar diya!",
+            "Jab tum yeh roz subah karna shuru karo ge, jism khud shukriya kahega.",
+            "Yeh aadat chhoti si hai lekin asar bohot bada hai. Aaj se shuru karo!",
         ],
     },
     "Talking Everyday Objects": {
         "_default": [
-            "You use me every day but never appreciate me. Let's talk about that.",
-            "I've been watching you, and honestly? We need to have a conversation.",
-            "If I could give you one piece of advice, it would be this.",
-            "You have no idea how much I do for you. Let me explain.",
+            "Roz mujhe use karte ho lekin kabhi shukriya nahi bola. Chalo baat karte hain!",
+            "Main tumhe dekh raha hoon, aur honestly? Humein baat karni chahiye.",
+            "Agar main tumhe ek mashwara de sakta toh yeh hota — suno dhyan se!",
+            "Tumhe andaza bhi nahi mein tumhare liye kitna karta hoon. Suno toh sahi!",
+            "Tum mujhe galat tareeqe se use kar rahe ho! Aao batata hoon sahi tareeqa.",
         ],
     },
     "Animals Explaining Science": {
         "_default": [
-            "Fun fact of the day — and this one is absolutely mind-blowing.",
-            "Humans have been doing this wrong for centuries. Let me explain why.",
-            "The science behind this is actually fascinating. Let me break it down for you.",
-            "Most people don't know this, but it changes everything about how you think about health.",
+            "Aaj ka fun fact — aur yeh waaqi mein dimagh hila dega tumhara!",
+            "Insaan centuries se yeh galat kar rahe hain. Main batata hoon kyun!",
+            "Is cheez ke peechay ka science bohot dilchasp hai. Chalo samjhte hain!",
+            "Aksar log yeh nahi jaante, lekin yeh sab badal deta hai sehat ke baare mein!",
+            "Kya tumhe pata hai yeh cheez kaise kaam karti hai? Nahi? Toh suno!",
         ],
     },
     "AI & Future Tech Visualizations": {
         "_default": [
-            "Welcome to the year 2030. This is what your daily life looks like now.",
-            "This technology seemed impossible five years ago. Now it's everywhere.",
-            "The future isn't coming — it's already here. Let me show you.",
+            "Saal 2030 mein khush aamdeed! Dekho tumhari rozana ki zindagi ab kaisi hai.",
+            "Paanch saal pehle yeh technology namumkin lagti thi. Ab har jagah hai!",
+            "Mustaqbil aa nahi raha — yeh pehle se yahan hai. Main dikhata hoon!",
+            "AI ne duniya badal di hai. Ab insaan aur machine saath kaam karte hain!",
         ],
     },
     "Motivational & Startup Stories": {
         "_default": [
-            "Everyone said this idea was crazy. They were wrong.",
-            "Six months ago I had nothing. Today? Everything changed because of one decision.",
-            "The hardest part wasn't building the product. It was believing in myself.",
+            "Sab ne kaha yeh idea pagalpan hai. Woh galat the, bilkul galat!",
+            "Cheh mahine pehle mere paas kuch nahi tha. Aaj? Ek faislay ne sab badal diya.",
+            "Sabse mushkil kaam product banana nahi tha. Khud pe bharosa karna tha!",
+            "Garage mein se shuru kiya, aaj duniya jaanti hai. Yeh meri kahani hai!",
+            "Haar mat mano. Kamyaabi un logon ko milti hai jo rukne se inkaar karte hain!",
         ],
     },
     "Satisfying Process Videos": {
-        "_default": [],  # No dialogue for satisfying videos
+        "_default": [],  # No dialogue for satisfying videos — ASMR only
     },
 }
+
+
+# ─── Viral Categories ────────────────────────────────────────────────────────
+
+VIRAL_CATEGORIES = [
+    {
+        "category": "Talking Fruits & Vegetables",
+        "subjects": [
+            "apple", "banana", "avocado", "strawberry", "blueberry", "mango",
+            "watermelon", "lemon", "orange", "carrot", "broccoli", "spinach",
+            "garlic", "ginger", "turmeric", "pomegranate", "kiwi", "pineapple",
+            "tomato", "sweet potato", "beet", "cucumber", "celery",
+        ],
+        "angles": [
+            "apne health benefits samjha raha hai insaanon ko",
+            "junk food khaane walon ki class le raha hai",
+            "doosre fruit se behas kar raha hai kaun zyada healthy hai",
+            "nutrition ke baare mein motivational speech de raha hai",
+            "kissi ne isko phenk diya aur yeh react kar raha hai",
+            "fridge mein doosri sabziyon ka interview le raha hai",
+            "fridge mein zyada der rehne ki shikayat kar raha hai",
+            "bachay ko sabzi khane ke liye mana raha hai",
+            "samjha raha hai ke yeh superfood kyun hai",
+            "ek simple recipe sikhane ki cooking show kar raha hai",
+        ],
+    },
+    {
+        "category": "Health & Wellness Tips",
+        "subjects": [
+            "subah ki routine", "pet ki sehat", "neend ki optimization",
+            "paani peena", "stress door karna", "immunity", "anti-aging khana",
+            "dimagh ki sehat", "energy badhana", "detox", "wazan ghatana",
+            "muscle recovery", "meditation", "cold therapy", "intermittent fasting",
+        ],
+        "angles": [
+            "doctor simple alfaaz mein science samjha raha hai",
+            "pehle aur baad ka transformation dikha raha hai",
+            "day-in-the-life healthy aadat dikha raha hai",
+            "aam ghaltfahmiyon ko door kar raha hai",
+            "do tareeqon ka comparison kar raha hai",
+        ],
+    },
+    {
+        "category": "Talking Everyday Objects",
+        "subjects": [
+            "coffee mug", "alarm clock", "toothbrush", "joote",
+            "smartphone", "paani ki bottle", "takiya", "sheeshe",
+            "fridge", "vitamin ki bottle", "blender", "yoga mat",
+            "kitaab", "mombatti",
+        ],
+        "angles": [
+            "shikayat kar raha hai ke galat tareeqe se use ho raha hai",
+            "apne nazariye se zindagi ka mashwara de raha hai",
+            "doosri cheez se behas kar raha hai",
+            "dramatic andaaz mein apni kahani suna raha hai",
+            "apne maalik ki daily habits review kar raha hai",
+        ],
+    },
+    {
+        "category": "Animals Explaining Science",
+        "subjects": [
+            "samajhdar ullu", "curious billi", "golden retriever",
+            "chhota haathi", "penguin", "dolphin", "lomri",
+            "khargosh", "tota", "kachhua",
+        ],
+        "angles": [
+            "professor ban ke science fact sikha raha hai",
+            "samjha raha hai insaan ajeeb kaam kyun karte hain",
+            "doosre jaanwaron ko TED talk de raha hai",
+            "apne baare mein nature documentary suna raha hai",
+            "insaani khane pe react kar ke nutrition samjha raha hai",
+        ],
+    },
+    {
+        "category": "AI & Future Tech Visualizations",
+        "subjects": [
+            "AI robot assistant", "2030 ka smart ghar",
+            "AI doctor", "self-driving sheher", "insaan-AI saath kaam",
+            "neural interface", "holographic display", "drone delivery",
+            "AI art studio", "robot chef", "AI teacher", "space mein colony",
+        ],
+        "angles": [
+            "2030 mein ek din kaisa hoga",
+            "aaj ki technology vs AI-powered mustaqbil",
+            "futuristic product ka advertisement",
+            "technology simply samjha raha hai",
+            "aaj se mustaqbil tak ka transformation dikha raha hai",
+        ],
+    },
+    {
+        "category": "Motivational & Startup Stories",
+        "subjects": [
+            "akela founder ka safar", "garage se lakhon tak",
+            "reject hone ke baad kamyaabi", "side hustle se full-time",
+            "AI startup idea", "no-code app launch",
+            "pehla customer ka moment", "business ko pivot karna",
+            "bootstrapped kamyaabi",
+        ],
+        "angles": [
+            "dramatic cinematic safar ki kahani",
+            "founder apna sabse mushkil waqt bata raha hai kamyaabi se pehle",
+            "split screen — struggle vs reward",
+            "business banana ka time-lapse",
+            "naukri chhod ke apna sapna pursue karna",
+        ],
+    },
+    {
+        "category": "Satisfying Process Videos",
+        "subjects": [
+            "perfect khana banana", "messy jagah organize karna",
+            "painting banana", "kuch scratch se banana",
+            "3D printing", "mitti ke bartan banana", "calligraphy",
+            "cake decorating", "lakri ka kaam", "app code karna",
+        ],
+        "angles": [
+            "close-up ASMR style satisfying sounds ke saath",
+            "shuru se aakhir tak time-lapse",
+            "split screen — messy vs clean/finished",
+            "intricate details mein zoom karna",
+            "final reveal ka moment",
+        ],
+    },
+]
 
 
 def _get_dialogue(category, subject):
@@ -236,83 +390,84 @@ def _get_dialogue(category, subject):
     cat_dialogues = DIALOGUES.get(category, {})
     lines = cat_dialogues.get(subject, cat_dialogues.get("_default", []))
     if not lines:
-        return "Did you know? Your daily habits shape your health more than genetics."
+        return "Kya tumhe pata hai? Tumhari roz ki aadatein tumhari sehat pe sabse zyada asar dalti hain!"
     return random.choice(lines)
 
 
-def generate_prompts(trending_data):
-    """
-    Generate daily image + Veo3 video prompts based on trending data.
-
-    Returns a list of prompt sets, each containing:
-    - category: the viral category name
-    - subject: specific subject
-    - angle: the creative angle
-    - image_prompt: ready-to-use image generation prompt
-    - veo3_prompt: ready-to-use Veo3 video prompt
-    - trending_hook: optional trending topic tie-in
-    """
+def _generate_prompt_set(categories, count, seed_str):
+    """Generate a specific number of prompts using the given seed."""
+    random.seed(seed_str)
     prompts = []
 
-    # Use today's date as seed for consistent daily output
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    random.seed(today)
+    # Shuffle categories and cycle through them
+    shuffled_cats = list(categories)
+    random.shuffle(shuffled_cats)
 
-    daily_categories = trending_data.get("daily_categories", [])
-    google_trends = trending_data.get("google_trends", [])
-
-    for cat in daily_categories:
+    idx = 0
+    while len(prompts) < count:
+        cat = shuffled_cats[idx % len(shuffled_cats)]
         category_name = cat["category"]
         subjects = cat["subjects"]
         angles = cat["angles"]
 
-        # Pick 2 subjects per category
-        chosen_subjects = random.sample(subjects, min(2, len(subjects)))
-        chosen_angle = random.choice(angles)
-        chosen_style = random.choice(IMAGE_STYLES)
+        subject = random.choice(subjects)
+        angle = random.choice(angles)
+        style = random.choice(IMAGE_STYLES)
+        dialogue = _get_dialogue(category_name, subject)
 
-        for subject in chosen_subjects:
-            # Get dialogue for Veo3
-            dialogue = _get_dialogue(category_name, subject)
+        # Image prompt
+        img_templates = IMAGE_TEMPLATES.get(category_name, [])
+        if img_templates:
+            image_prompt = random.choice(img_templates).format(subject=subject, style=style)
+        else:
+            image_prompt = f"A stunning image of {subject}, {angle}, {style}"
 
-            # Generate image prompt
-            img_templates = IMAGE_TEMPLATES.get(category_name, [])
-            if img_templates:
-                img_template = random.choice(img_templates)
-                image_prompt = img_template.format(
-                    subject=subject, style=chosen_style
-                )
-            else:
-                image_prompt = f"A stunning image of {subject}, {chosen_angle}, {chosen_style}"
+        # Veo3 prompt
+        veo3_templates = VEO3_TEMPLATES.get(category_name, [])
+        if veo3_templates:
+            veo3_prompt = random.choice(veo3_templates).format(subject=subject, dialogue=dialogue)
+        else:
+            veo3_prompt = (
+                f'Cinematic medium shot of {subject}, {angle}. '
+                f'A voice narrates in Urdu: "{dialogue}" '
+                f'Beautiful lighting, smooth camera movement. Audio: ambient music, clear Urdu voice. (no subtitles)'
+            )
 
-            # Generate Veo3 video prompt
-            veo3_templates = VEO3_TEMPLATES.get(category_name, [])
-            if veo3_templates:
-                veo3_template = random.choice(veo3_templates)
-                veo3_prompt = veo3_template.format(
-                    subject=subject, dialogue=dialogue
-                )
-            else:
-                veo3_prompt = (
-                    f'Cinematic medium shot of {subject}, {chosen_angle}. '
-                    f'A voice narrates: "{dialogue}" '
-                    f'Beautiful lighting, smooth camera movement. Audio: ambient music, clear voice. (no subtitles)'
-                )
+        prompts.append({
+            "category": category_name,
+            "subject": subject,
+            "angle": angle,
+            "image_prompt": image_prompt,
+            "veo3_prompt": veo3_prompt,
+        })
 
-            # Tie to a trending topic if available
-            trending_hook = ""
-            if google_trends:
-                trend = random.choice(google_trends)
-                trending_hook = f"Trending tie-in: Connect this to '{trend}' for extra reach"
+        idx += 1
 
-            prompts.append({
-                "category": category_name,
-                "subject": subject,
-                "angle": chosen_angle,
-                "image_prompt": image_prompt,
-                "veo3_prompt": veo3_prompt,
-                "trending_hook": trending_hook,
-            })
-
-    print(f"  ✓ Generated {len(prompts)} image + Veo3 prompt sets")
     return prompts
+
+
+def generate_prompts(trending_data=None):
+    """
+    Generate prompts in 3 time-based sets:
+    - Today (5 prompts) — changes daily
+    - This Week (5 prompts) — changes weekly
+    - This Month (5 prompts) — changes monthly
+
+    Returns dict with keys: daily, weekly, monthly
+    """
+    now = datetime.now(timezone.utc)
+
+    # Seeds for time-based rotation
+    daily_seed = now.strftime("%Y-%m-%d")
+    weekly_seed = f"{now.year}-W{now.isocalendar()[1]}"
+    monthly_seed = now.strftime("%Y-%m")
+
+    result = {
+        "daily": _generate_prompt_set(VIRAL_CATEGORIES, 5, f"daily-{daily_seed}"),
+        "weekly": _generate_prompt_set(VIRAL_CATEGORIES, 5, f"weekly-{weekly_seed}"),
+        "monthly": _generate_prompt_set(VIRAL_CATEGORIES, 5, f"monthly-{monthly_seed}"),
+    }
+
+    total = sum(len(v) for v in result.values())
+    print(f"  ✓ Generated {total} prompts (5 daily + 5 weekly + 5 monthly)")
+    return result

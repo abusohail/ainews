@@ -1,227 +1,143 @@
 """
-AI News Digest — Main Orchestrator
+Viral Content Prompts — Main Orchestrator
 
-Runs all collectors, ranks content, builds email, and sends the daily digest.
-Designed to be run via cron at 10:00 AM PKT daily.
+Generates daily viral content prompts (image + Veo3 video) and sends
+them via email. Designed to run via cron at 10:00 AM PKT daily.
 
 Usage:
-    python main.py           # Full run: collect → rank → email
-    python main.py --dry-run # Collect and rank, but don't send email (prints to console)
-    python main.py --test    # Send a test email with sample data
+    python main.py           # Full run: generate prompts → email
+    python main.py --dry-run # Generate prompts but don't send email
+    python main.py --test    # Send a test email with sample prompts
 """
 
 import sys
 import time
 from datetime import datetime, timezone, timedelta
 
-from collectors import reddit, hackernews, producthunt, youtube, twitter, news_rss
-from collectors.trending import get_daily_topics
-from ranker import rank_and_filter, group_by_type
 from prompt_generator import generate_prompts
 from email_builder import build_email
 from email_sender import send_email
 
 
-def collect_all():
-    """Run all collectors and return combined results."""
-    all_items = []
-
-    collectors = [
-        ("Reddit", reddit.fetch),
-        ("Hacker News", hackernews.fetch),
-        ("Product Hunt", producthunt.fetch),
-        ("YouTube", youtube.fetch),
-        ("Twitter/X", twitter.fetch),
-        ("News RSS", news_rss.fetch),
-    ]
-
-    for name, fetch_fn in collectors:
-        try:
-            items = fetch_fn()
-            all_items.extend(items)
-        except Exception as e:
-            print(f"  ✗ {name} collector crashed: {e}")
-            continue
-
-    return all_items
-
-
 def run(dry_run=False):
-    """Main pipeline: collect → rank → build email → send."""
-
+    """Main pipeline: generate prompts → build email → send."""
     tz = timezone(timedelta(hours=5))
     now = datetime.now(tz)
     print(f"\n{'='*60}")
-    print(f"  🤖 AI Daily Digest — {now.strftime('%A, %B %d, %Y %I:%M %p PKT')}")
+    print(f"  🎬 Viral Content Prompts — {now.strftime('%A, %B %d, %Y %I:%M %p PKT')}")
     print(f"{'='*60}\n")
 
-    # Step 1: Collect
-    print("📡 Collecting from all sources...")
+    # Step 1: Generate prompts
+    print("🎬 Generating viral content prompts...\n")
     start = time.time()
-    all_items = collect_all()
-    elapsed = time.time() - start
-    print(f"\n  📊 Total collected: {len(all_items)} items in {elapsed:.1f}s\n")
 
-    if not all_items:
-        print("  ⚠ No items collected from any source. Skipping email.")
+    try:
+        prompts_data = generate_prompts()
+    except Exception as e:
+        print(f"  ✗ Prompt generation failed: {e}")
         return
 
-    # Step 2: Rank & Filter
-    print("🏆 Ranking and filtering outperforming content...")
-    top_items = rank_and_filter(all_items)
-    print(f"  📊 After ranking: {len(top_items)} outperforming items\n")
+    elapsed = time.time() - start
+    total = sum(len(v) for v in prompts_data.values())
+    print(f"\n  📊 Total: {total} prompts in {elapsed:.1f}s\n")
 
-    # Step 3: Group by type
-    grouped = group_by_type(top_items)
-    for category, items in grouped.items():
-        if items:
-            label = category.replace("_", " ").title()
-            print(f"  • {label}: {len(items)} items")
-    print()
-
-    # Step 4: Get trending topics & generate prompts
-    print("🎬 Generating viral content prompts...")
-    try:
-        trending_data = get_daily_topics()
-        prompts = generate_prompts(trending_data)
-    except Exception as e:
-        print(f"  ⚠ Prompt generation failed: {e}")
-        prompts = []
-    print()
-
-    # Step 5: Build email
-    print("📧 Building email digest...")
-    html = build_email(grouped, len(all_items), prompts=prompts)
+    # Step 2: Build email
+    print("📧 Building email...")
+    html = build_email(prompts_data)
 
     if dry_run:
-        print("\n🔍 DRY RUN — Email would contain:\n")
-        for category, items in grouped.items():
-            if not items:
-                continue
-            label = category.replace("_", " ").title()
-            print(f"  ── {label} ──")
-            for item in items:
-                score = item.get("score", 0)
-                source = item.get("source", "")
-                print(f"  [{source}] {item['title']}")
-                if score:
-                    print(f"         Score: {score:,}")
-                print()
-        if prompts:
-            print("\n  ── Viral Content Prompts ──")
-            for p in prompts:
-                print(f"  [{p['category']}] {p['subject']}")
-                print(f"         Image: {p['image_prompt'][:80]}...")
-                print(f"         Veo3:  {p['veo3_prompt'][:80]}...")
-                print()
+        print("\n🔍 DRY RUN — Prompts generated:\n")
+        for period, label in [("daily", "Aaj Ke"), ("weekly", "Is Hafte Ke"), ("monthly", "Is Maheene Ke")]:
+            items = prompts_data.get(period, [])
+            if items:
+                print(f"  ── {label} Viral Prompts ({len(items)}) ──")
+                for p in items:
+                    print(f"  [{p['category']}] {p['subject']}")
+                    print(f"      Angle: {p['angle']}")
+                    print(f"      Image: {p['image_prompt'][:80]}...")
+                    print(f"      Veo3:  {p['veo3_prompt'][:80]}...")
+                    print()
         print("  ✓ Dry run complete. No email sent.")
         return
 
-    # Step 6: Send email
+    # Step 3: Send email
     print("📮 Sending email...")
     success = send_email(html)
 
     if success:
         print(f"\n{'='*60}")
-        print(f"  ✅ Digest sent successfully!")
+        print(f"  ✅ Prompts sent successfully!")
         print(f"{'='*60}\n")
     else:
         print(f"\n{'='*60}")
-        print(f"  ❌ Failed to send digest. Check errors above.")
+        print(f"  ❌ Failed to send. Check errors above.")
         print(f"{'='*60}\n")
         sys.exit(1)
 
 
 def send_test():
-    """Send a test email with sample content to verify setup."""
-    print("\n📧 Sending test email...")
+    """Send a test email with sample prompts."""
+    print("\n📧 Sending test email with sample prompts...")
 
-    test_items = {
-        "top_stories": [
+    test_data = {
+        "daily": [
             {
-                "title": "OpenAI releases GPT-5 with groundbreaking reasoning",
-                "url": "https://example.com/gpt5",
-                "source": "r/artificial",
-                "source_category": "Reddit",
-                "score": 5420,
-                "comments": 1243,
-                "description": "OpenAI has announced the release of GPT-5, featuring improved reasoning capabilities...",
-                "content_type": "article",
-                "engagement": 7906,
+                "category": "Talking Fruits & Vegetables",
+                "subject": "avocado",
+                "angle": "junk food khaane walon ki class le raha hai",
+                "image_prompt": "A giant avocado with a sassy expression and raised eyebrow, sitting next to junk food it disapproves of, 3D Pixar-style render, vibrant colors, soft lighting, cute character design",
+                "veo3_prompt": 'Medium shot of an avocado character with cartoon eyes and a mouth, standing on a kitchen counter next to a plate of junk food. The avocado gestures dramatically and says in a sassy Urdu tone: "Haan bhai mehenga hoon. Lekin hospital ka bill dekha hai? Main sasta option hoon." Camera at eye level, slight handheld movement. Bright kitchen lighting. Audio: comedic background music, expressive Urdu voice. (no subtitles)',
             },
             {
-                "title": "Show HN: I built an open-source AI coding assistant",
-                "url": "https://news.ycombinator.com/item?id=12345",
-                "source": "Hacker News",
-                "source_category": "Hacker News",
-                "score": 342,
-                "comments": 89,
-                "description": "342 points · 89 comments",
-                "content_type": "article",
-                "engagement": 520,
+                "category": "Animals Explaining Science",
+                "subject": "samajhdar ullu",
+                "angle": "professor ban ke science fact sikha raha hai",
+                "image_prompt": "A wise owl wearing a tiny lab coat and round glasses, standing at a chalkboard with science diagrams, cinematic film still, shallow depth of field, warm golden hour lighting",
+                "veo3_prompt": 'Medium shot of a wise owl sitting at a tiny desk in a library setting, wearing miniature round glasses. It looks up from a book at the camera and says in a professorial Urdu tone: "Aaj ka fun fact — aur yeh waaqi mein dimagh hila dega tumhara!" Warm library lighting, bookshelves in background. Camera slowly zooms in. Audio: gentle classical music, scholarly Urdu voice. (no subtitles)',
             },
-        ],
-        "videos": [
             {
-                "title": "The AI Tool That Changes Everything (2025)",
-                "url": "https://youtube.com/watch?v=test123",
-                "source": "Matt Wolfe",
-                "source_category": "YouTube",
-                "score": 150000,
-                "comments": 0,
-                "description": "In this video, we explore the latest AI tool that's changing the game...",
-                "content_type": "video",
-                "engagement": 150000,
+                "category": "Health & Wellness Tips",
+                "subject": "subah ki routine",
+                "angle": "doctor simple alfaaz mein science samjha raha hai",
+                "image_prompt": "Split-screen visual: left side showing a tired person in gray tones, right side showing an energetic person in vibrant colors, with 'subah ki routine' text overlay, hyperrealistic photography, 8K, studio lighting, sharp focus",
+                "veo3_prompt": 'Cinematic tracking shot following a person as they demonstrate morning routine. The scene transitions from a dark, sluggish morning to an energetic, vibrant atmosphere. Voiceover narrates in Urdu: "Yeh ek simple change ne meri poori energy badal di. Suno dhyan se!" Warm golden lighting gradually increases. Audio: inspirational ambient music, calm Urdu narrator voice. (no subtitles)',
             },
-        ],
-        "tools": [
             {
-                "title": "AutomateAI — No-code AI workflow builder",
-                "url": "https://producthunt.com/posts/automateai",
-                "source": "Product Hunt",
-                "source_category": "Product Hunt",
-                "score": 287,
-                "comments": 0,
-                "description": "Build AI automations without writing code. Connect APIs, models, and data sources.",
-                "content_type": "tool",
-                "engagement": 287,
+                "category": "Motivational & Startup Stories",
+                "subject": "akela founder ka safar",
+                "angle": "dramatic cinematic safar ki kahani",
+                "image_prompt": "Cinematic shot of a solo founder journey, dramatic lighting, determination on the face, laptop glowing in a dark garage, editorial magazine photography, clean background, professional lighting",
+                "veo3_prompt": 'Cinematic close-up of a founder\'s face illuminated by a laptop screen in a dark garage. They\'re working on their startup. The person looks at camera with determination and says in Urdu: "Sab ne kaha yeh idea pagalpan hai. Woh galat the, bilkul galat!" Low-key dramatic lighting, shallow depth of field. Audio: emotional piano building, raw authentic Urdu voice. (no subtitles)',
+            },
+            {
+                "category": "Talking Everyday Objects",
+                "subject": "alarm clock",
+                "angle": "apne maalik ki daily habits review kar raha hai",
+                "image_prompt": "A alarm clock with an animated cartoon face, sitting on a nightstand, looking annoyed at its owner, hyper-detailed macro photography, dramatic lighting, rich textures",
+                "veo3_prompt": 'Close-up shot of an alarm clock on a bedside table at 6 AM. The alarm clock has a cartoon face that suddenly opens its eyes. Looking exasperated, it says in Urdu: "Roz mujhe use karte ho lekin kabhi shukriya nahi bola. Chalo baat karte hain!" Camera slow push-in. Early morning blue light transitioning to warm. Audio: alarm sound fading in, comedic Urdu voice. (no subtitles)',
             },
         ],
-        "news": [
+        "weekly": [
             {
-                "title": "Google DeepMind achieves new breakthrough in protein folding",
-                "url": "https://techcrunch.com/test",
-                "source": "TechCrunch AI",
-                "source_category": "News",
-                "score": 0,
-                "comments": 0,
-                "description": "Researchers at Google DeepMind have announced significant improvements to AlphaFold...",
-                "content_type": "article",
-                "engagement": 0,
+                "category": "AI & Future Tech Visualizations",
+                "subject": "AI robot assistant",
+                "angle": "2030 mein ek din kaisa hoga",
+                "image_prompt": "Futuristic scene of AI robot assistant, glowing holographic interfaces, neon blue and purple lighting, cyberpunk aesthetic, cinematic film still, shallow depth of field, warm golden hour lighting",
+                "veo3_prompt": 'Sweeping aerial shot descending into a futuristic city scene showing AI robot assistant. Holographic interfaces glow in neon blue and purple. A narrator says in an awe-inspired Urdu voice: "Saal 2030 mein khush aamdeed! Dekho tumhari rozana ki zindagi ab kaisi hai." Dramatic cinematic lighting. Audio: epic orchestral music, deep Urdu narrator voice. (no subtitles)',
+            },
+        ],
+        "monthly": [
+            {
+                "category": "Satisfying Process Videos",
+                "subject": "perfect khana banana",
+                "angle": "close-up ASMR style satisfying sounds ke saath",
+                "image_prompt": "Top-down view of cooking a perfect meal, perfectly organized, satisfying symmetry, clean workspace, editorial magazine photography, clean background, professional lighting",
+                "veo3_prompt": "Top-down close-up shot of hands precisely cooking a perfect meal. Every movement is deliberate and satisfying. The camera slowly pulls back to reveal the full workspace. Audio: crisp ASMR sounds of the activity, soft lo-fi background music. No voice. (no subtitles)",
             },
         ],
     }
 
-    test_prompts = [
-        {
-            "category": "Talking Fruits & Vegetables",
-            "subject": "avocado",
-            "angle": "roasting people for eating junk food instead",
-            "image_prompt": "A giant avocado with a sassy expression and raised eyebrow, sitting next to junk food it disapproves of, 3D Pixar-style render, vibrant colors, soft lighting, cute character design",
-            "veo3_prompt": 'Medium shot of an avocado character with cartoon eyes and a mouth, standing on a kitchen counter next to a plate of junk food. The avocado gestures dramatically and says in a sassy tone: "Yes, I\'m expensive. But have you seen your hospital bills? I\'m the cheaper option." Camera at eye level, slight handheld movement. Bright kitchen lighting. Audio: comedic background music, expressive voice. (no subtitles)',
-            "trending_hook": "Trending tie-in: Connect this to 'Healthy Eating Week' for extra reach",
-        },
-        {
-            "category": "AI & Future Tech Visualizations",
-            "subject": "AI robot assistant",
-            "angle": "a day in the life in the year 2030",
-            "image_prompt": "Futuristic scene of AI robot assistant, glowing holographic interfaces, neon blue and purple lighting, cyberpunk aesthetic, cinematic film still, shallow depth of field, warm golden hour lighting",
-            "veo3_prompt": 'Sweeping aerial shot descending into a futuristic city scene showing AI robot assistant. Holographic interfaces glow in neon blue and purple. A narrator says in an awe-inspired voice: "Welcome to the year 2030. This is what your daily life looks like now." Dramatic cinematic lighting. Audio: epic orchestral music, deep narrator voice. (no subtitles)',
-            "trending_hook": "",
-        },
-    ]
-
-    html = build_email(test_items, 42, prompts=test_prompts)
+    html = build_email(test_data)
     success = send_email(html)
 
     if success:
