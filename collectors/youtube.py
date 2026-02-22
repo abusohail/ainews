@@ -19,7 +19,7 @@ def _parse_youtube_rss(channel_name, channel_id):
         resp.raise_for_status()
 
         feed = feedparser.parse(resp.text)
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=48)  # 48h window for videos
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)  # Strict 24h window
 
         for entry in feed.entries[:10]:  # Last 10 videos per channel
             title = entry.get("title", "")

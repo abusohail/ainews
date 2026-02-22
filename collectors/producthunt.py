@@ -26,7 +26,7 @@ def _fetch_from_rss():
         resp.raise_for_status()
 
         feed = feedparser.parse(resp.text)
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=48)  # PH posts last longer
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)  # Strict 24h window
 
         for entry in feed.entries:
             title = entry.get("title", "")

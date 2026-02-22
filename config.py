@@ -27,26 +27,45 @@ REDDIT_SUBREDDITS = [
     "OpenAI",
     "StableDiffusion",
     "ArtificialIntelligence",
+    "nocode",
+    "SaaS",
+    "startup",
+    "startups",
+    "Entrepreneur",
+    "AItools",
+    "automation",
 ]
 REDDIT_MIN_SCORE = 50  # Minimum upvotes to qualify
 
 # ─── Hacker News ──────────────────────────────────────────────────────────────
 HN_AI_KEYWORDS = [
+    # Core AI
     "ai", "artificial intelligence", "machine learning", "deep learning",
     "llm", "gpt", "openai", "anthropic", "claude", "gemini", "mistral",
     "transformer", "neural network", "chatbot", "copilot", "diffusion",
-    "stable diffusion", "midjourney", "dall-e", "sora", "automation",
+    "stable diffusion", "midjourney", "dall-e", "sora",
     "agent", "rag", "fine-tuning", "fine tuning", "lora", "hugging face",
     "langchain", "vector database", "embedding", "nlp", "computer vision",
-    "generative ai", "gen ai", "no-code", "startup",
+    "generative ai", "gen ai",
+    # No-code & Automation
+    "no-code", "nocode", "low-code", "automation", "automate", "workflow",
+    "zapier", "make.com", "n8n", "ai tool", "ai app",
+    # Startups & Business
+    "startup", "saas", "launch", "founder", "venture", "funding",
+    "business", "entrepreneur", "product", "side project",
+    "monetize", "revenue", "bootstrapped", "yc", "y combinator",
+    # Ideas & Tools
+    "ai idea", "use case", "prompt", "ai workflow", "ai agent",
+    "cursor", "bolt", "lovable", "replit", "v0",
 ]
 HN_MIN_SCORE = 30  # Minimum HN points to qualify
 
 # ─── Product Hunt ─────────────────────────────────────────────────────────────
 PH_AI_KEYWORDS = [
     "ai", "artificial intelligence", "machine learning", "gpt", "llm",
-    "automation", "chatbot", "no-code", "copilot", "agent",
-    "generative", "neural", "deep learning",
+    "automation", "automate", "chatbot", "no-code", "nocode", "low-code",
+    "copilot", "agent", "workflow", "generative", "neural", "deep learning",
+    "startup", "saas", "productivity", "tool", "builder",
 ]
 PH_MIN_VOTES = 20
 
