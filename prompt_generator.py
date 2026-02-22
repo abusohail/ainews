@@ -1,7 +1,7 @@
 """
 Prompt Generator — Creates AI image + Veo3 video prompts for viral content.
-Focus: Fruits, Vegetables, Health, Mobile/Tech, Everyday Objects.
-All dialogues in Roman Urdu.
+Focus: Fruits, Vegetables, Health, Junk Food, Everyday Life.
+All dialogues in Urdu script. All images/videos in 9:16 vertical (Reels) format.
 
 Generates:
 - Aaj Ke Viral Prompts (5)
@@ -17,14 +17,17 @@ from datetime import datetime, timezone
 
 # ─── Image Styles ─────────────────────────────────────────────────────────────
 
+# All images must be 9:16 vertical for Reels/TikTok/Shorts
+ASPECT_RATIO = "9:16 vertical aspect ratio, portrait orientation, mobile-first, optimized for Instagram Reels and TikTok"
+
 IMAGE_STYLES = [
-    "hyperrealistic photography, 8K, studio lighting, sharp focus",
-    "3D Pixar-style render, vibrant colors, soft lighting, cute character design",
-    "cinematic film still, shallow depth of field, warm golden hour lighting",
-    "editorial magazine photography, clean background, professional lighting",
-    "whimsical illustration style, pastel colors, dreamy atmosphere",
-    "hyper-detailed macro photography, dramatic lighting, rich textures",
-    "modern minimalist design, clean composition, vibrant accent colors",
+    f"hyperrealistic photography, 8K, studio lighting, sharp focus, {ASPECT_RATIO}",
+    f"3D Pixar-style render, vibrant colors, soft lighting, cute character design, {ASPECT_RATIO}",
+    f"cinematic film still, shallow depth of field, warm golden hour lighting, {ASPECT_RATIO}",
+    f"editorial magazine photography, clean background, professional lighting, {ASPECT_RATIO}",
+    f"whimsical illustration style, pastel colors, dreamy atmosphere, {ASPECT_RATIO}",
+    f"hyper-detailed macro photography, dramatic lighting, rich textures, {ASPECT_RATIO}",
+    f"modern minimalist design, clean composition, vibrant accent colors, {ASPECT_RATIO}",
 ]
 
 # ─── Categories (user's interests only) ──────────────────────────────────────
@@ -115,60 +118,85 @@ VIRAL_CATEGORIES = [
             "step by step recipe slow motion mein",
         ],
     },
+    {
+        "category": "Junk Food Nuqsanat",
+        "subjects": [
+            "burger", "pizza", "fries", "cold drink", "chips",
+            "instant noodles", "hot dog", "fried chicken",
+            "donuts", "ice cream", "chocolate bar", "energy drink",
+            "processed meat", "packaged juice", "cookies",
+        ],
+        "angles": [
+            "صحت پر سب سے بڑا نقصان بتا رہا ہے",
+            "صحت مند متبادل تجویز کر رہا ہے",
+            "چونکا دینے والے حقائق بتا رہا ہے",
+            "جسم پر اثرات کا موازنہ کر رہا ہے",
+            "ایک ہفتہ کھانے کے بعد کیا ہوتا ہے",
+            "بچوں کو کیوں نہیں دینا چاہیے",
+        ],
+    },
 ]
 
 # ─── Image Templates ─────────────────────────────────────────────────────────
 
 IMAGE_TEMPLATES = {
     "Talking Fruits & Vegetables": [
-        "A {subject} with an expressive cartoon face (big eyes, wide smile), sitting on a kitchen counter, looking directly at camera, {style}",
-        "Anthropomorphic {subject} character wearing tiny glasses, standing at a podium giving a speech about health, {style}",
-        "A giant {subject} with a friendly face, arms and legs, pointing at a health facts poster in a kitchen, {style}",
-        "Close-up of a {subject} with a sassy expression and raised eyebrow, sitting next to junk food it disapproves of, {style}",
-        "A {subject} character dressed as a doctor with a tiny stethoscope, giving health advice, {style}",
+        "A {subject} with an expressive cartoon face (big eyes, wide smile), sitting on a kitchen counter, looking directly at camera, tall vertical frame, {style}",
+        "Anthropomorphic {subject} character wearing tiny glasses, standing at a podium giving a speech about health, centered portrait composition, {style}",
+        "A giant {subject} with a friendly face, arms and legs, pointing at a health facts poster in a kitchen, full-body vertical shot, {style}",
+        "Close-up of a {subject} with a sassy expression and raised eyebrow, sitting next to junk food it disapproves of, vertical centered, {style}",
+        "A {subject} character dressed as a doctor with a tiny stethoscope, giving health advice, portrait vertical frame, {style}",
     ],
     "Health & Wellness": [
-        "Split-screen visual: left side showing a tired person in gray tones, right side showing an energetic person in vibrant colors, topic: {subject}, {style}",
-        "A beautiful flat lay arrangement related to {subject}, shot from above on a marble surface with natural light, {style}",
-        "Infographic-style image showing the benefits of {subject}, with simple icons, clean medical design, {style}",
-        "A person practicing {subject} in a beautiful natural setting at sunrise, {style}",
+        "Split-screen vertical: top half showing a tired person in gray tones, bottom half showing an energetic person in vibrant colors, topic: {subject}, {style}",
+        "A beautiful flat lay of {subject} items, shot top-down on marble, portrait orientation, {style}",
+        "Infographic-style vertical poster showing the benefits of {subject}, clean medical design, mobile format, {style}",
+        "A person practicing {subject} in a beautiful natural setting at sunrise, full-body portrait shot, {style}",
     ],
     "Fayde aur Nuqsanat": [
-        "A split image: left side green check marks showing advantages of {subject}, right side red crosses showing disadvantages, clean infographic style, {style}",
-        "An anthropomorphic {subject} with an animated face, looking both helpful and dangerous, dual personality, {style}",
-        "A dramatic scene showing {subject} with angel wings on one side and devil horns on the other, {style}",
-        "A balance scale with benefits on one side and harms on other side about {subject}, {style}",
+        "A vertical split poster: top half green check marks showing advantages of {subject}, bottom half red crosses showing disadvantages, {style}",
+        "An anthropomorphic {subject} with an animated face, angel wings on one side and devil horns on the other, vertical centered, {style}",
+        "A dramatic vertical scene showing {subject} with angel on left and devil on right, portrait frame, {style}",
+        "A vertical balance scale visual about {subject}, benefits vs harms, clean infographic, {style}",
     ],
     "Kitchen & Cooking Tips": [
-        "A beautiful overhead shot of {subject} ingredients laid out on a rustic wooden table, warm lighting, {style}",
-        "An anthropomorphic {subject} character wearing an apron and chef hat, proudly showing off its recipe, {style}",
-        "Close-up of {subject} being prepared, steam rising, warm cozy kitchen background, {style}",
+        "A beautiful top-down portrait shot of {subject} ingredients laid out on a rustic wooden table, {style}",
+        "An anthropomorphic {subject} character wearing an apron and chef hat, vertical centered portrait, {style}",
+        "Close-up portrait shot of {subject} being prepared, steam rising, warm cozy kitchen background, {style}",
     ],
     "Satisfying Food Videos": [
-        "Top-down view of {subject}, perfectly organized, satisfying symmetry, clean workspace, {style}",
-        "Close-up of hands doing {subject}, shallow depth of field, warm lighting, ASMR aesthetic, {style}",
-        "Ingredients for {subject} laid out beautifully in rows, ready to begin, {style}",
+        "Top-down portrait view of {subject}, perfectly organized, satisfying symmetry, clean workspace, {style}",
+        "Close-up portrait of hands doing {subject}, shallow depth of field, warm lighting, ASMR aesthetic, {style}",
+        "Ingredients for {subject} laid out beautifully in vertical rows, ready to begin, {style}",
+    ],
+    "Junk Food Nuqsanat": [
+        "A dramatic vertical poster showing {subject} with a red warning sign, skull symbol overlay, dark moody lighting, {style}",
+        "Split vertical image: top half shows appealing {subject}, bottom half shows its damage to the body with X-ray style visuals, {style}",
+        "An evil-looking anthropomorphic {subject} with devil horns and a sneaky grin, dark background, {style}",
+        "A vertical infographic showing {subject} ingredients with toxic warning labels and health damage stats, {style}",
     ],
 }
 
-# ─── Veo3 Templates ──────────────────────────────────────────────────────────
+# ─── Veo3 Templates — all 9:16 vertical for Reels ────────────────────────────
+
+VEO3_ASPECT = "Vertical 9:16 frame, portrait orientation for Instagram Reels and TikTok."
 
 VEO3_TEMPLATES = {
     "Talking Fruits & Vegetables": [
         (
-            'Close-up cinematic shot of a {subject} with an expressive animated face on a rustic cutting board in a sunlit kitchen. '
+            f'{VEO3_ASPECT} Close-up cinematic portrait shot of a {{subject}} with an expressive animated face on a rustic cutting board in a sunlit kitchen. '
             'The {subject} looks at camera and speaks in confident Urdu: "{dialogue}" '
             'Camera slowly dollies in. Warm natural lighting. Audio: cheerful music, crisp Urdu voice. (no subtitles)'
         ),
         (
-            'Medium shot of a {subject} with cartoon eyes standing on a kitchen counter next to junk food. '
+            f'{VEO3_ASPECT} Medium portrait shot of a {{subject}} with cartoon eyes standing on a kitchen counter next to junk food. '
             'It gestures dramatically and says in sassy Urdu: "{dialogue}" '
             'Camera at eye level. Bright kitchen lighting. Audio: comedic music, expressive Urdu voice. (no subtitles)'
         ),
     ],
     "Health & Wellness": [
         (
-            'Cinematic tracking shot following a person demonstrating {subject}. '
+            f'{VEO3_ASPECT} Cinematic vertical tracking shot following a person demonstrating {{subject}}. '
             'Scene transitions from dark sluggish morning to vibrant energy. '
             'Voiceover in Urdu: "{dialogue}" '
             'Warm golden lighting. Audio: inspirational music, calm Urdu voice. (no subtitles)'
@@ -176,189 +204,225 @@ VEO3_TEMPLATES = {
     ],
     "Fayde aur Nuqsanat": [
         (
-            'Split screen cinematic shot. Left side shows the benefits of {subject} in bright warm colors. '
-            'Right side shows the harms in dark cold tones. '
+            f'{VEO3_ASPECT} Vertical split screen: top half shows benefits of {{subject}} in bright warm colors, bottom half shows harms in dark cold tones. '
             'A narrator explains in Urdu: "{dialogue}" '
             'Dramatic lighting contrast. Audio: tense background music, clear Urdu voice. (no subtitles)'
-        ),
-        (
-            'Medium shot of an anthropomorphic {subject} sitting at a talk show desk. '
-            'It looks at camera seriously and says in Urdu: "{dialogue}" '
-            'Studio lighting. Audio: news-style background music, professional Urdu voice. (no subtitles)'
         ),
     ],
     "Kitchen & Cooking Tips": [
         (
-            'Close-up overhead shot of hands preparing {subject} on a rustic wooden surface. '
+            f'{VEO3_ASPECT} Close-up portrait shot of hands preparing {{subject}} on a rustic wooden surface. '
             'Steam rises beautifully. A warm Urdu voice narrates: "{dialogue}" '
             'Golden kitchen lighting. Audio: gentle cooking sounds, soothing Urdu voice. (no subtitles)'
         ),
     ],
     "Satisfying Food Videos": [
         (
-            'Top-down close-up of hands precisely doing {subject}. Every movement is satisfying. '
-            'Camera slowly pulls back to reveal the full scene. '
+            f'{VEO3_ASPECT} Top-down portrait close-up of hands precisely doing {{subject}}. Every movement is satisfying. '
+            'Camera slowly pulls back. '
             'Audio: crisp ASMR sounds, soft lo-fi music. No voice. (no subtitles)'
+        ),
+    ],
+    "Junk Food Nuqsanat": [
+        (
+            f'{VEO3_ASPECT} Dramatic vertical cinematic shot of {{subject}} on a table, lit with dark red warning lighting. '
+            'It slowly transforms to show its harmful effects inside the body. '
+            'Narrator says in Urdu: "{dialogue}" '
+            'Tense dramatic music, serious Urdu voice. (no subtitles)'
+        ),
+        (
+            f'{VEO3_ASPECT} Medium portrait shot of a person happily eating {{subject}}, then cut to showing the damage it causes — side by side comparison. '
+            'Narrator warns in Urdu: "{dialogue}" '
+            'Audio: shocking music sting, urgent Urdu voice. (no subtitles)'
         ),
     ],
 }
 
-# ─── Roman Urdu Dialogues ────────────────────────────────────────────────────
+# ─── Urdu Script Dialogues (for proper Veo3 pronunciation) ───────────────────
 
 DIALOGUES = {
     "Talking Fruits & Vegetables": {
         "apple": [
-            "Roz ek apple khao aur doctor ki zaroorat nahi. Yeh meri taraf se free mashwara hai!",
-            "Mujh mein fiber hai, vitamins hain, aur tumhari chips ki aadat pe bohot dukh hai.",
-            "Tumhare jism ko meri zaroorat hai, lekin tum junk food ke peechay bhaag rahe ho.",
+            "روز ایک سیب کھاؤ اور ڈاکٹر کی ضرورت نہیں۔ یہ میری طرف سے فری مشورہ ہے!",
+            "مجھ میں فائبر ہے، وٹامنز ہیں، اور تمہاری چپس کی عادت پر بہت دکھ ہے۔",
+            "تمہارے جسم کو میری ضرورت ہے، لیکن تم جنک فوڈ کے پیچھے بھاگ رہے ہو۔",
         ],
         "banana": [
-            "Main perfect snack hoon bhai. Apna wrapper bhi saath laata hoon. Chips mein yeh baat hai?",
-            "Potassium, energy, khushi — sab kuch hai mujh mein. Aur sirf sau calories. Khao mujhe!",
-            "Subah ka pehla kaam — banana khao. Energy din bhar rahegi, promise!",
+            "میں پرفیکٹ سنیک ہوں بھائی۔ اپنا ریپر بھی ساتھ لاتا ہوں۔ چپس میں یہ بات ہے؟",
+            "پوٹاشیم، انرجی، خوشی — سب کچھ ہے مجھ میں۔ اور صرف سو کیلوریز۔ کھاؤ مجھے!",
+            "صبح کا پہلا کام — کیلا کھاؤ۔ انرجی دن بھر رہے گی، پرامس!",
         ],
         "avocado": [
-            "Haan bhai mehenga hoon. Lekin hospital ka bill dekha hai? Main sasta option hoon.",
-            "Healthy fats, fiber, aur bees tarah ke vitamins. Main basically multivitamin hoon.",
-            "Toast pe lagao, salad mein daalo — bas mujhe ignore mat karo!",
+            "ہاں بھائی مہنگا ہوں۔ لیکن ہسپتال کا بل دیکھا ہے؟ میں سستا آپشن ہوں۔",
+            "ہیلتھی فیٹس، فائبر، اور بیس طرح کے وٹامنز۔ میں بنیادی طور پر ملٹی وٹامن ہوں۔",
+            "ٹوسٹ پر لگاؤ، سلاد میں ڈالو — بس مجھے نظرانداز مت کرو!",
         ],
         "mango": [
-            "Phalon ka badshah hoon main. Season aaye toh mujhe zaroor khana!",
-            "Vitamin A, C, fiber — aur taste toh poochho hi mat. King of fruits hoon bhai!",
-            "Log diet ke naam pe mujhse door bhagte hain. Arre moderation mein khao!",
+            "پھلوں کا بادشاہ ہوں میں۔ سیزن آئے تو مجھے ضرور کھانا!",
+            "وٹامن اے، سی، فائبر — اور ذائقہ تو پوچھو ہی مت۔ پھلوں کا بادشاہ ہوں بھائی!",
+            "لوگ ڈائیٹ کے نام پر مجھ سے دور بھاگتے ہیں۔ ارے اعتدال میں کھاؤ!",
         ],
         "watermelon": [
-            "Garmi mein mujhse behtar koi nahi. Paani bhi milega aur maza bhi!",
-            "Dehydration ka ilaaj hoon main. Cold drink choro, mujhe khao!",
+            "گرمی میں مجھ سے بہتر کوئی نہیں۔ پانی بھی ملے گا اور مزا بھی!",
+            "پانی کی کمی کا علاج ہوں میں۔ کولڈ ڈرنک چھوڑو، مجھے کھاؤ!",
         ],
         "lemon": [
-            "Subah garam paani mein mera ras daalo. Metabolism coffee se bhi pehle jaag jayega.",
-            "Nimbu paani piyo, taza raho. Yeh desi nuskha hai aur kaam karta hai!",
+            "صبح گرم پانی میں میرا رس ڈالو۔ میٹابولزم کافی سے بھی پہلے جاگ جائے گا۔",
+            "نیمبو پانی پیو، تازہ رہو۔ یہ دیسی نسخہ ہے اور کام کرتا ہے!",
         ],
         "orange": [
-            "Vitamin C ka king hoon main. Bimaar hone se pehle mujhe khao, baad mein nahi!",
-            "Mujhe juice bana ke mat piyo, seedha khao. Fiber bhi milega!",
+            "وٹامن سی کا بادشاہ ہوں میں۔ بیمار ہونے سے پہلے مجھے کھاؤ، بعد میں نہیں!",
+            "مجھے جوس بنا کر مت پیو، سیدھا کھاؤ۔ فائبر بھی ملے گا!",
         ],
         "pomegranate": [
-            "Khoon badhana hai? Mujhse poochho. Anaar ka juice roz piyo, fark dikh jayega!",
-            "Antioxidants itne hain mujh mein ke bimariyan door hi rehti hain.",
+            "خون بڑھانا ہے؟ مجھ سے پوچھو۔ انار کا جوس روز پیو، فرق دکھ جائے گا!",
+            "اینٹی آکسیڈنٹس اتنے ہیں مجھ میں کہ بیماریاں دور ہی رہتی ہیں۔",
         ],
         "carrot": [
-            "Tumhari dadi sahi kehti thi — main aankhon ke liye acha hoon. Aur skin ke liye bhi!",
-            "Snack ban sakta hoon, juice ban sakta hoon, halwa bhi. Versatile king hoon!",
+            "تمہاری دادی صحیح کہتی تھیں — میں آنکھوں کے لیے اچھا ہوں۔ اور جلد کے لیے بھی!",
+            "سنیک بن سکتا ہوں، جوس بن سکتا ہوں، حلوہ بھی۔ ورسٹائل بادشاہ ہوں!",
         ],
         "broccoli": [
-            "Bachay mujhse nafrat karte hain, lekin immunity MUJHSE pyaar karti hai!",
-            "Orange se zyada vitamin C, doodh se zyada calcium. Phir bhi ignore?",
+            "بچے مجھ سے نفرت کرتے ہیں، لیکن قوت مدافعت مجھ سے پیار کرتی ہے!",
+            "سنترے سے زیادہ وٹامن سی، دودھ سے زیادہ کیلشیم۔ پھر بھی نظرانداز؟",
         ],
         "spinach": [
-            "Popeye ne mujhe kha ke taaqat payi thi. Tum kyun nahi khaate?",
-            "Palak paneer bana lo, smoothie mein daalo — bas mujhe waste mat karo!",
+            "پوپائی نے مجھے کھا کر طاقت پائی تھی۔ تم کیوں نہیں کھاتے؟",
+            "پالک پنیر بنا لو، سموتھی میں ڈالو — بس مجھے ضائع مت کرو!",
         ],
         "garlic": [
-            "Haan saans mein boo aati hai. Lekin immunity itni strong ho jaati hai!",
-            "Khana mein agar main nahi toh taste bhi nahi aur sehat bhi nahi!",
+            "ہاں سانس میں بو آتی ہے۔ لیکن قوت مدافعت اتنی مضبوط ہو جاتی ہے!",
+            "کھانے میں اگر میں نہیں تو ذائقہ بھی نہیں اور صحت بھی نہیں!",
         ],
         "ginger": [
-            "Gala kharab hai? Adrak ki chai piyo. Main natural dawai hoon!",
-            "Digestion ka masla? Adrak khao. Centuries se kaam kar raha hoon!",
+            "گلا خراب ہے؟ ادرک کی چائے پیو۔ میں قدرتی دوائی ہوں!",
+            "ہاضمے کا مسئلہ؟ ادرک کھاؤ۔ صدیوں سے کام کر رہا ہوں!",
         ],
         "turmeric": [
-            "Haldi ke baghair na khana mukammal hai na sehat. Main sab ka ilaaj hoon!",
-            "Anti-inflammatory, antiseptic — bhai main toh dawaiyon ki maa hoon!",
+            "ہلدی کے بغیر نہ کھانا مکمل ہے نہ صحت۔ میں سب کا علاج ہوں!",
+            "سوزش ختم کرنے والی، جراثیم کش — بھائی میں تو دوائیوں کی ماں ہوں!",
         ],
         "tomato": [
-            "Lycopene mujh mein hai — dil ki sehat ke liye behtareen hoon main!",
-            "Har khane mein main hoon — salad, curry, chutney. Mujhse badhkar kaun?",
+            "لائکوپین مجھ میں ہے — دل کی صحت کے لیے بہترین ہوں میں!",
+            "ہر کھانے میں میں ہوں — سلاد، سالن، چٹنی۔ مجھ سے بڑھ کر کون؟",
         ],
         "onion": [
-            "Rulaata hoon, pata hai. Lekin immunity aisi banaata hoon ke bimari roye!",
-            "Kachha khao ya pakao, dono tareeqe se faydemand hoon. Sochlo!",
+            "رلاتا ہوں، پتا ہے۔ لیکن قوت مدافعت ایسی بناتا ہوں کہ بیماری روئے!",
+            "کچا کھاؤ یا پکاؤ، دونوں طریقے سے فائدہ مند ہوں۔ سوچ لو!",
         ],
         "cucumber": [
-            "Garmi mein mujhe khao. Paani, vitamins, aur thandak — sab milega!",
-            "Weight loss karna hai? Main tumhara best friend hoon. Kam calories, zyada fayda!",
+            "گرمی میں مجھے کھاؤ۔ پانی، وٹامنز، اور ٹھنڈک — سب ملے گا!",
+            "وزن کم کرنا ہے؟ میں تمہارا بہترین دوست ہوں۔ کم کیلوریز، زیادہ فائدہ!",
         ],
         "_default": [
-            "Oye! Haan tum — jo processed food kha rahe ho. Idhar aao, mujhse baat karo!",
-            "Main sirf khana nahi hoon — main dawai hoon. Aise treat karo mujhe!",
-            "Tumhari sehat tumhare haath mein hai. Aur main tumhare haath mein hona chahiye!",
+            "اوئے! ہاں تم — جو پراسیسڈ فوڈ کھا رہے ہو۔ ادھر آؤ، مجھ سے بات کرو!",
+            "میں صرف کھانا نہیں ہوں — میں دوائی ہوں۔ ایسے ٹریٹ کرو مجھے!",
+            "تمہاری صحت تمہارے ہاتھ میں ہے۔ اور میں تمہارے ہاتھ میں ہونا چاہیے!",
         ],
     },
     "Health & Wellness": {
         "_default": [
-            "Yeh ek simple change ne meri poori energy badal di. Suno dhyan se!",
-            "Science kehti hai yeh sabse underrated health habit hai.",
-            "Maine yeh 30 din kiya aur results ne mujhe bhi hairan kar diya!",
-            "Jab tum yeh roz karna shuru karo ge, jism khud shukriya kahega.",
-            "Yeh aadat chhoti si hai lekin asar bohot bada hai. Aaj se shuru karo!",
-            "Tumhara jism tumhe kuch batana chahta hai. Suno toh sahi!",
+            "یہ ایک سادہ تبدیلی نے میری پوری انرجی بدل دی۔ سنو دھیان سے!",
+            "سائنس کہتی ہے یہ سب سے کم سمجھی جانے والی صحت کی عادت ہے۔",
+            "میں نے یہ تیس دن کیا اور نتائج نے مجھے بھی حیران کر دیا!",
+            "جب تم یہ روز کرنا شروع کرو گے، جسم خود شکریہ کہے گا۔",
+            "یہ عادت چھوٹی سی ہے لیکن اثر بہت بڑا ہے۔ آج سے شروع کرو!",
+            "تمہارا جسم تمہیں کچھ بتانا چاہتا ہے۔ سنو تو سہی!",
         ],
     },
     "Fayde aur Nuqsanat": {
         "mobile phone": [
-            "Ek taraf duniya mutthi mein hai, doosri taraf aankhein, neend, aur sehat kharab. Sochlo!",
-            "Mobile tumhara naukar hai ya tum uske? Zyada use ka yeh hai nuksan!",
-            "Do ghante se zyada screen time? Tumhare dimagh aur aankhon ko khatra hai!",
+            "ایک طرف دنیا مٹھی میں ہے، دوسری طرف آنکھیں، نیند، اور صحت خراب۔ سوچ لو!",
+            "موبائل تمہارا نوکر ہے یا تم اس کے؟ زیادہ استعمال کا یہ ہے نقصان!",
+            "دو گھنٹے سے زیادہ سکرین ٹائم؟ تمہارے دماغ اور آنکھوں کو خطرہ ہے!",
         ],
         "social media": [
-            "Connect karta hai lekin mentally disconnect bhi kar deta hai. Balance rakho!",
-            "Scrolling mein waqt guzar jaata hai, lekin kya sach mein kuch haasil hota hai?",
-            "Comparison ki bimari social media se aati hai. Apni zindagi pe focus karo!",
+            "جوڑتا ہے لیکن ذہنی طور پر الگ بھی کر دیتا ہے۔ بیلنس رکھو!",
+            "سکرولنگ میں وقت گزر جاتا ہے، لیکن کیا سچ میں کچھ حاصل ہوتا ہے؟",
+            "موازنے کی بیماری سوشل میڈیا سے آتی ہے۔ اپنی زندگی پر فوکس کرو!",
         ],
         "junk food": [
-            "Taste ek minute ka, lekin sehat ka nuqsan zindagi bhar ka. Yeh soudah theek nahi!",
-            "Burger, pizza, fries — sab mila ke tumhare jism ko kya de rahe ho? Sirf fat!",
+            "ذائقہ ایک منٹ کا، لیکن صحت کا نقصان زندگی بھر کا۔ یہ سودا ٹھیک نہیں!",
+            "برگر، پیزا، فرائز — سب ملا کر تمہارے جسم کو کیا دے رہے ہو؟ صرف فیٹ!",
         ],
         "cold drinks": [
-            "Ek glass mein das chamach cheeni. Yeh tum pi rahe ho roz. Sochlo!",
-            "Thanda peena hai toh paani piyo. Cold drink tumhare haddiyon ko kamzor karti hai!",
+            "ایک گلاس میں دس چمچ چینی۔ یہ تم روز پی رہے ہو۔ سوچ لو!",
+            "ٹھنڈا پینا ہے تو پانی پیو۔ کولڈ ڈرنک تمہاری ہڈیوں کو کمزور کرتی ہے!",
         ],
         "chai": [
-            "Ek do cup theek hai, lekin din mein cheh? Tumhara pet aur neend dono kharab!",
-            "Chai ke fayde bhi hain — antioxidants. Lekin bina cheeni piyo toh aur acha!",
+            "ایک دو کپ ٹھیک ہے، لیکن دن میں چھ؟ تمہارا پیٹ اور نیند دونوں خراب!",
+            "چائے کے فائدے بھی ہیں — اینٹی آکسیڈنٹس۔ لیکن بغیر چینی پیو تو اور اچھا!",
         ],
         "coffee": [
-            "Subah ki coffee se energy milti hai, lekin raat ko piyo toh neend ud jaati hai!",
-            "Ek cup kafi hai — literally. Zyada coffee anxiety aur acidity karta hai.",
+            "صبح کی کافی سے انرجی ملتی ہے، لیکن رات کو پیو تو نیند اڑ جاتی ہے!",
+            "ایک کپ کافی ہے — لٹرلی۔ زیادہ کافی اینگزائٹی اور ایسیڈیٹی کرتا ہے۔",
         ],
         "earphones": [
-            "Din bhar earphones lagaye ho? Tumhari hearing danger mein hai. Volume kam karo!",
-            "Music sunna acha hai lekin ek ghante se zyada earphones mat lagao. Kaan ka khayal rakho!",
+            "دن بھر ایئرفونز لگائے ہو؟ تمہاری سماعت خطرے میں ہے۔ والیوم کم کرو!",
+            "میوزک سننا اچھا ہے لیکن ایک گھنٹے سے زیادہ ایئرفونز مت لگاؤ۔ کان کا خیال رکھو!",
         ],
         "sugar": [
-            "Cheeni meethi hai lekin asar kadwa hai. Diabetes, obesity, dil ka masla — sab iska kaam!",
-            "Din mein cheh chamach se zyada sugar? Tum apne jism ke saath zulm kar rahe ho!",
+            "چینی میٹھی ہے لیکن اثر کڑوا ہے۔ ذیابیطس، موٹاپا، دل کا مسئلہ — سب اس کا کام!",
+            "دن میں چھ چمچ سے زیادہ شوگر؟ تم اپنے جسم کے ساتھ ظلم کر رہے ہو!",
         ],
         "screen time": [
-            "Din bhar screen dekhne se aankhein, neend, dimagh — sab affect hota hai. Break lo!",
-            "Har bees minute mein bees second ke liye bees feet door dekho. 20-20-20 rule yaad rakho!",
+            "دن بھر سکرین دیکھنے سے آنکھیں، نیند، دماغ — سب متاثر ہوتا ہے۔ بریک لو!",
+            "ہر بیس منٹ میں بیس سیکنڈ کے لیے بیس فٹ دور دیکھو۔ بیس بیس بیس کا اصول یاد رکھو!",
         ],
         "fast food": [
-            "Jaldi milta hai, jaldi khaya jaata hai, lekin jism ko jaldi kharab bhi karta hai!",
-            "Ek hafta fast food bandh karo. Fark khud mehsoos karo ge!",
+            "جلدی ملتا ہے، جلدی کھایا جاتا ہے، لیکن جسم کو جلدی خراب بھی کرتا ہے!",
+            "ایک ہفتہ فاسٹ فوڈ بند کرو۔ فرق خود محسوس کرو گے!",
         ],
         "_default": [
-            "Har cheez ke do pehlu hote hain. Aao dekhte hain fayde aur nuqsanat!",
-            "Yeh cheez kitni faydamand hai aur kitni nuqsandeh — aaj jaante hain!",
-            "Limit mein use karo toh fayda, zyada karo toh nuksan. Yeh hai asli baat!",
+            "ہر چیز کے دو پہلو ہوتے ہیں۔ آؤ دیکھتے ہیں فائدے اور نقصانات!",
+            "یہ چیز کتنی فائدہ مند ہے اور کتنی نقصاندہ — آج جانتے ہیں!",
+            "حد میں استعمال کرو تو فائدہ، زیادہ کرو تو نقصان۔ یہ ہے اصلی بات!",
         ],
     },
     "Kitchen & Cooking Tips": {
         "_default": [
-            "Yeh desi nuskha saalon se kaam kar raha hai. Aaj tum bhi aazmaao!",
-            "Nani kehti thi roz yeh khao. Science ne bhi sahi sabit kar diya!",
-            "Subah khaali pet yeh lo — din bhar energy rahegi, pakka!",
-            "Yeh combination sehat ke liye kamaal hai. Try karo aaj se!",
-            "Kitchen mein yeh cheez hai? Toh tum doctor ke paas jaana bhool jao!",
+            "یہ دیسی نسخہ سالوں سے کام کر رہا ہے۔ آج تم بھی آزماؤ!",
+            "نانی کہتی تھیں روز یہ کھاؤ۔ سائنس نے بھی صحیح ثابت کر دیا!",
+            "صبح خالی پیٹ یہ لو — دن بھر انرجی رہے گی، پکا!",
+            "یہ کمبینیشن صحت کے لیے کمال ہے۔ آج سے شروع کرو!",
+            "کچن میں یہ چیز ہے؟ تو تم ڈاکٹر کے پاس جانا بھول جاؤ!",
         ],
     },
     "Satisfying Food Videos": {
         "_default": [],  # No dialogue — ASMR only
     },
+    "Junk Food Nuqsanat": {
+        "burger": [
+            "یہ برگر جتنا لذیذ ہے، اتنا ہی تمہارے دل کے لیے خطرناک ہے ۔ سوچلو!",
+            "ایک برگر میں اتنی کیلوریز ہیں جو آدھے دن کی ضرورت ہے۔ روز کھاؤ تو سوچو کیا ہوگا!",
+        ],
+        "pizza": [
+            "پیزہ کی ئیک سلائس میں تمہارہ پورے دن کی شوگر سے زیادہ چینی ہے۔ ہوش کرو!",
+            "ہفتے میں ایک سے زیادہ پیزہ کھانا وزن بڑھانے کی سب سے آسان راہ ہے!",
+        ],
+        "cold drink": [
+            "ایک گلاس میں دس چمچ چینی۔ یہ تم روز پی رہے ہو۔ سوچلو!",
+            "کولڈ ڈرنک تمہاری ہڈیوں، دانتوں، اور پیٹ کو خراب کر رہی ہے۔ پانی پیو!",
+        ],
+        "chips": [
+            "چپس میں کیا ہے; نمک، تیل، اور خالی کیلوریز۔ تمہارے جسم کو کچھ نہیں ملتا!",
+            "چپس کی بیگ کھول کے بیٹھ جاؤ تو رکنا مشکل ہو جاتا ہے۔ یہی ہے مسئلہ!",
+        ],
+        "instant noodles": [
+            "فوری نوڈلز میں سوڈیم اتنا زیادہ ہے کہ آپ کی کدمبندی متاثر ہو سکتی ہے!",
+            "جلدی تیار ہونے والی یہ چیز تمہارے جسم کو آہستہ آہستہ خراب کر رہی ہے!",
+        ],
+        "_default": [
+            "یہ چیز جتنی لذیذ ہے، اتنی ہی تمہاری صحت کی دشمن ہے۔ سوچلو!",
+            "ایک ہفتہ یہ کھانا بند کرو۔ تمہارا جسم خود شکریہ کہے گا!",
+            "یہ فوڈ تمہیں خوش کرتا ہے لیکن تمہاری صحت برباد کرتا ہے۔ آگاہ رہو!",
+        ],
+    },
 }
 
-# ─── Video Series Templates (3-5 connected clips for longer video) ───────────
+# ─── Video Series Templates (3-5 connected clips for longer video) ───────────────────
+
+SERIES_ASPECT = "Vertical 9:16 portrait frame, optimized for Reels and TikTok."
 
 VIDEO_SERIES = [
     {
@@ -366,9 +430,9 @@ VIDEO_SERIES = [
         "category": "Talking Fruits & Vegetables",
         "clips": [
             {
-                "clip_title": "Part 1: Introduction",
+                "clip_title": "Part 1: Taaruf",
                 "prompt": (
-                    'Close-up of a {subject} with cute cartoon face sitting alone in a dark fridge. '
+                    f'{SERIES_ASPECT} Close-up of a {{subject}} with cute cartoon face sitting alone in a dark fridge. '
                     'It opens its eyes, looks at camera and says in Urdu: "{intro_dialogue}" '
                     'Blue refrigerator light. Camera slowly pushes in. Audio: mysterious music, curious Urdu voice. (no subtitles)'
                 ),
